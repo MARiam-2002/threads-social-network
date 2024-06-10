@@ -3,6 +3,7 @@ import { asyncHandler } from "../../../utils/asyncHandler.js";
 import bcryptjs from "bcryptjs";
 import generateTokenAndSetCookie from "../../../utils/generateTokenAndSetCookie.js";
 import cloudinary from "../../../utils/cloud.js";
+import mongoose from "mongoose";
 // import jwt from "jsonwebtoken";
 // import { sendEmail } from "../../../utils/sendEmails.js";
 // import { resetPassword, signupTemp } from "../../../utils/generateHtml.js";
@@ -165,12 +166,19 @@ export const update = asyncHandler(async (req, res, next) => {
 });
 
 export const getProfile = asyncHandler(async (req, res, next) => {
-  const { userName } = req.params;
-  const user = await userModel
-    .findOne({ userName })
-    .select("-password -updatedAt")
-    .populate("followers", "name userName profileImage")
-    .populate("following", "name userName profileImage");
+  const { query } = req.params;
+  let user;
+  if (mongoose.Types.ObjectId.isValid(query)) {
+    user = await userModel
+      .findOne({ _id: query })
+      .select("-password -createdAt");
+  } else {
+    user = await userModel
+      .findOne({
+        userName: query,
+      })
+      .select("-password -createdAt");
+  }
   if (!user) {
     return next(new Error("User not found!", { cause: 404 }));
   }

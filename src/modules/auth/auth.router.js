@@ -5,7 +5,7 @@ import * as userController from "./controller/auth.js";
 import { isAuthenticated } from "../../middleware/authentication.middleware.js";
 import { fileUpload, filterObject } from "../../utils/multer.js";
 const router = Router();
-router.get("/profile/:userName", userController.getProfile);
+router.get("/profile/:query", userController.getProfile);
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
 router.get("/logout", userController.logout);
