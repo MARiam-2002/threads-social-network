@@ -14,6 +14,7 @@ router.post(
 );
 router.get("/feed", isAuthenticated, postController.getFeedPosts);
 router.get("/:id", postController.getPost);
+router.get("/user/:userName", postController.getUserPosts);
 router.delete("/:id", isAuthenticated, postController.deletePost);
 router.put("/like/:id", isAuthenticated, postController.likeUnLikePost);
 router.put("/reply/:id", isAuthenticated, postController.replyToPost);

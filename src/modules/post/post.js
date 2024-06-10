@@ -64,6 +64,9 @@ export const deletePost = asyncHandler(async (req, res, next) => {
       new Error("You are not authorized to delete this post", { cause: 401 })
     );
   }
+  if (post.img) {
+    await cloudinary.uploader.destroy(post.img.id);
+  }
   await postModel.findByIdAndDelete(id);
   return res.status(200).json({ success: true, message: "Post deleted" });
 });
@@ -128,4 +131,16 @@ export const getFeedPosts = asyncHandler(async (req, res, next) => {
     .find({ postedBy: { $in: following } })
     .sort({ createdAt: -1 });
   return res.status(200).json({ success: true, feePosts });
+});
+
+export const getUserPosts = asyncHandler(async (req, res, next) => {
+  const { userName } = req.params;
+  const user = await userModel.findOne({ userName });
+  if (!user) {
+    return next(new Error("User not found", { cause: 404 }));
+  }
+  const posts = await postModel
+    .find({ postedBy: user._id })
+    .sort({ createdAt: -1 });
+  return res.status(200).json({ success: true, posts });
 });
