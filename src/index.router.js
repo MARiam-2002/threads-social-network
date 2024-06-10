@@ -1,4 +1,5 @@
 import authRouter from "./modules/auth/auth.router.js";
+import postRouter from "./modules/post/post.router.js";
 import { globalErrorHandling } from "./utils/asyncHandler.js";
 import cors from "cors";
 import morgan from "morgan";
@@ -39,8 +40,9 @@ export const bootstrap = (app, express) => {
   app.use(cors());
   app.use(express.json());
   app.use(cookieParser())
+  
   app.use("/auth", authRouter);
-
+  app.use("/post", postRouter);
   app.use((error, req, res, next) => {
     return res.json({ message: error.message, stack: error.stack });
   });

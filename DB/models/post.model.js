@@ -1,4 +1,3 @@
-import { required } from "joi";
 import mongoose, { Schema, Types } from "mongoose";
 const postSchema = new Schema(
   {
@@ -15,8 +14,9 @@ const postSchema = new Schema(
       type: String,
     },
     likes: {
-      type: Number,
-      default: 0,
+      type: [Types.ObjectId],
+      ref: "User",
+      default: [],
     },
     replies: [
       {
