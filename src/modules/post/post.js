@@ -116,7 +116,7 @@ export const replyToPost = asyncHandler(async (req, res, next) => {
   await post.save();
   return res
     .status(200)
-    .json({ success: true, message: "Reply added successfully!", post });
+    .json({ success: true, message: "Reply added successfully!", reply });
 });
 
 export const getFeedPosts = asyncHandler(async (req, res, next) => {

@@ -4,6 +4,7 @@ import bcryptjs from "bcryptjs";
 import generateTokenAndSetCookie from "../../../utils/generateTokenAndSetCookie.js";
 import cloudinary from "../../../utils/cloud.js";
 import mongoose from "mongoose";
+import postModel from "../../../../DB/models/post.model.js";
 // import jwt from "jsonwebtoken";
 // import { sendEmail } from "../../../utils/sendEmails.js";
 // import { resetPassword, signupTemp } from "../../../utils/generateHtml.js";
@@ -159,6 +160,16 @@ export const update = asyncHandler(async (req, res, next) => {
   user.userName = userName || user.userName;
   user.bio = bio || user.bio;
   user = await user.save();
+  await postModel.updateMany(
+    { "replies.userId": userId },
+    {
+      $set: {
+        "replies.$[reply].userName": user.userName,
+        "replies.$[reply].profileImage": user.profileImage,
+      },
+    },
+    { arrayFilters: [{ "reply.userId": userId }] }
+  );
   const userUpdated = await userModel.findById(user._id).select("-password");
   return res
     .status(200)
