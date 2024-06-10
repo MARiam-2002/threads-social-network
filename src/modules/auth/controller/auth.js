@@ -158,9 +158,10 @@ export const update = asyncHandler(async (req, res, next) => {
   user.userName = userName || user.userName;
   user.bio = bio || user.bio;
   user = await user.save();
+  const userUpdated = await userModel.findById(user._id).select("-password");
   return res
     .status(200)
-    .json({ message: "profile updated successfully!", user });
+    .json({ message: "profile updated successfully!", userUpdated });
 });
 
 export const getProfile = asyncHandler(async (req, res, next) => {

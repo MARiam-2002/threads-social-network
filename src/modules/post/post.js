@@ -1,9 +1,10 @@
 import postModel from "../../../DB/models/post.model.js";
 import userModel from "../../../DB/models/user.model.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import cloudinary from "../../utils/cloud.js";
 
 export const createPost = asyncHandler(async (req, res, next) => {
-  const { postedBy, text, img } = req.body;
+  const { postedBy, text } = req.body;
   if (!postedBy || !text) {
     return next(new Error("postedBy and text is required", { cause: 404 }));
   }
@@ -25,8 +26,21 @@ export const createPost = asyncHandler(async (req, res, next) => {
   const post = await postModel.create({
     postedBy,
     text,
-    img,
   });
+  if (req.file) {
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        folder: `${process.env.FOLDER_CLOUDINARY}/post/${post.postedBy}`,
+      }
+    );
+    post.img = {
+      id: public_id,
+      url: secure_url,
+    };
+    await post.save();
+  }
+
   return res.status(201).json({ success: true, data: post });
 });
 

@@ -11,7 +11,12 @@ const postSchema = new Schema(
       max: 500,
     },
     img: {
-      type: String,
+      url: {
+        type: String,
+      },
+      id: {
+        type: String,
+      },
     },
     likes: {
       type: [Types.ObjectId],
