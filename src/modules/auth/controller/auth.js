@@ -2,6 +2,7 @@ import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler } from "../../../utils/asyncHandler.js";
 import bcryptjs from "bcryptjs";
 import generateTokenAndSetCookie from "../../../utils/generateTokenAndSetCookie.js";
+import cloudinary from "../../../utils/cloud.js";
 // import jwt from "jsonwebtoken";
 // import { sendEmail } from "../../../utils/sendEmails.js";
 // import { resetPassword, signupTemp } from "../../../utils/generateHtml.js";
@@ -38,6 +39,8 @@ export const signup = asyncHandler(async (req, res, next) => {
       name: user.name,
       email: user.email,
       userName: user.userName,
+      bio: user.bio,
+      profileImage: user.profileImage,
     },
   });
 });
@@ -59,6 +62,8 @@ export const login = asyncHandler(async (req, res, next) => {
       name: user.name,
       email: user.email,
       userName: user.userName,
+      bio: user.bio,
+      profileImage: user.profileImage,
     },
   });
 });
@@ -125,10 +130,32 @@ export const update = asyncHandler(async (req, res, next) => {
     );
     user.password = hashPassword;
   }
+  if (req.file) {
+    if (
+      user.profileImage.id ==
+      "ecommerceDefaults/user/png-clipart-user-profile-facebook-passport-miscellaneous-silhouette_aol7vc"
+    ) {
+      const { public_id, secure_url } = await cloudinary.uploader.upload(
+        req.file.path,
+        {
+          folder: `${process.env.FOLDER_CLOUDINARY}/user/${user._id}`,
+        }
+      );
+      user.profileImage.url = secure_url;
+      user.profileImage.id = public_id;
+    } else {
+      const { public_id, secure_url } = await cloudinary.uploader.upload(
+        req.file.path,
+        {
+          public_id: user.profileImage.id,
+        }
+      );
+      user.profileImage.url = secure_url;
+    }
+  }
   user.name = name || user.name;
   user.email = email || user.email;
   user.userName = userName || user.userName;
-  user.profileImage = profileImage || user.profileImage;
   user.bio = bio || user.bio;
   user = await user.save();
   return res
@@ -148,4 +175,3 @@ export const getProfile = asyncHandler(async (req, res, next) => {
   }
   return res.status(200).json({ success: true, user });
 });
-
