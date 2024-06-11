@@ -18,8 +18,8 @@ const messageSchema = new Schema(
 			default: false,
 		},
 		img: {
-			type: String,
-			default: "",
+      id: String,
+      url: String,
 		},
   },
   { timestamps: true }

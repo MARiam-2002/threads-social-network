@@ -2,6 +2,7 @@ import conversationModel from "../../../../DB/models/conversation.model.js";
 import messageModel from "../../../../DB/models/message.model.js";
 // import { getRecipientSocketId, io } from "../../../../index.js";
 import { asyncHandler } from "../../../utils/asyncHandler.js";
+import cloudinary from "../../../utils/cloud.js";
 
 export const sendMessage = asyncHandler(async (req, res, next) => {
   const { recipientId, message } = req.body;
@@ -18,11 +19,26 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
       },
     });
   }
+ 
   const newMessage = await messageModel.create({
     conversationId: conversation._id,
     senderId,
     text: message,
   });
+  if (req.file) {
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        folder: `${process.env.FOLDER_CLOUDINARY}/message/${conversation._id}`,
+      }
+    );
+    newMessage.img = {
+      id: public_id,
+      url: secure_url,
+    };
+    await newMessage.save();
+    
+  }
   conversation.lastMessage = {
     senderId,
     text: message,
@@ -30,10 +46,9 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
   await conversation.save();
 
   // const recipientSocketId = getRecipientSocketId(recipientId);
-	// 	if (recipientSocketId) {
-	// 		io.to(recipientSocketId).emit("newMessage", newMessage);
-	// 	}
-
+  // 	if (recipientSocketId) {
+  // 		io.to(recipientSocketId).emit("newMessage", newMessage);
+  // 	}
 
   return res.status(201).json({
     success: true,
