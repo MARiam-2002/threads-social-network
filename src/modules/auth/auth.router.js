@@ -6,6 +6,7 @@ import { isAuthenticated } from "../../middleware/authentication.middleware.js";
 import { fileUpload, filterObject } from "../../utils/multer.js";
 const router = Router();
 router.get("/profile/:query", userController.getProfile);
+router.get("/suggested",isAuthenticated, userController.getSuggestedUsers);
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
 router.get("/logout", userController.logout);

@@ -195,3 +195,28 @@ export const getProfile = asyncHandler(async (req, res, next) => {
   }
   return res.status(200).json({ success: true, user });
 });
+
+export const getSuggestedUsers = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const usersFollowedByYou = await userModel.findById(userId).select("following");
+
+  const users = await userModel.aggregate([
+    {
+      $match: {
+        _id: { $ne: userId },
+      },
+    },
+    {
+      $sample: { size: 10 },
+    },
+  ]);
+  const filteredUsers = users.filter(
+    (user) => !usersFollowedByYou.following.includes(user._id)
+  );
+  const suggestedUsers = filteredUsers.slice(0, 4);
+
+  suggestedUsers.forEach((user) => (user.password = null));
+
+  res.status(200).json(suggestedUsers);
+});
