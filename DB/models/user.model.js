@@ -55,6 +55,10 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
+    isFrozen:{
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

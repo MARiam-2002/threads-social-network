@@ -17,5 +17,6 @@ router.put(
   fileUpload(filterObject.image).single("imageProfile"),
   userController.update
 );
+router.put("/freeze",isAuthenticated,userController.freezeAccount)
 
 export default router;

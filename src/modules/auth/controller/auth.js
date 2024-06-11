@@ -56,6 +56,11 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("Invalid userName or password", { cause: 400 }));
   }
 
+  if (user.isFrozen) {
+    user.isFrozen = false;
+    await user.save();
+  }
+
   generateTokenAndSetCookie(user.id, res);
   return res.status(200).json({
     success: true,
@@ -199,7 +204,9 @@ export const getProfile = asyncHandler(async (req, res, next) => {
 export const getSuggestedUsers = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
 
-  const usersFollowedByYou = await userModel.findById(userId).select("following");
+  const usersFollowedByYou = await userModel
+    .findById(userId)
+    .select("following");
 
   const users = await userModel.aggregate([
     {
@@ -219,4 +226,16 @@ export const getSuggestedUsers = asyncHandler(async (req, res, next) => {
   suggestedUsers.forEach((user) => (user.password = null));
 
   res.status(200).json(suggestedUsers);
+});
+
+export const freezeAccount = asyncHandler(async (req, res, next) => {
+  const user = await userModel.findById(req.user._id);
+  if (!user) {
+    return next(new Error("User not found!", { cause: 404 }));
+  }
+  user.isFrozen = !user.isFrozen;
+  await user.save();
+  return res
+    .status(200)
+    .json({ success: true, message: "Account frozen successfully!" });
 });
